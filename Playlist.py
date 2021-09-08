@@ -16,8 +16,10 @@ class Playlist:
         self.id = None
         self.ui.logoutBtn.clicked.connect(self.logoutClicked)
         self.ui.modifyInfoBtn.clicked.connect(self.modifyClicked)
-        # self.ui.addListBtn.clicked.connect()
-
+        self.ui.addListBtn.clicked.connect(self.addClicked)
+        self.playList = []
+        self.listCount = 0
+        
         self.modWin = ModifyWindow.ModifyWindow()
         self.modWin.setupUi()
         self.modWin.okBtn.clicked.connect(self.modWin.okBtnClicked)
@@ -41,6 +43,22 @@ class Playlist:
         self.modWin.pwInput.setText("")
         self.modWin.modStackedWidget.setCurrentIndex(0)
         self.modWin.modWindow.show()
+
+    def addClicked(self): # 버튼 동작 안함
+        self.listCount += 1
+        newList = QtWidgets.QLabel(self.ui.listWidget)
+        
+        newList.setGeometry(90 + ((self.listCount - 1) % 4) * 345, 50 + ((self.listCount - 1) / 4) * 200, 285, 160)
+        newList.setStyleSheet(
+            "background-color: white;"
+            "border-radius: 1px"
+        )
+        self.playList.append(newList)
+
+
+        
+
+    
 
     def setId(self, id):
         self.id = id

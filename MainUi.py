@@ -1,3 +1,4 @@
+from os import X_OK
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 import sys
@@ -296,18 +297,19 @@ class MainUi(object):
 
         
         self.listScroll = QtWidgets.QScrollArea(self.playlistPage)
-        self.listScroll.setGeometry(50, 250, 1500, 600)
-        self.listScroll.setStyleSheet(
-            "background-color: white;"
-            
-        )
-
-        self.listWidget = QtWidgets.QWidget(self.listScroll)
-        self.listWidget.setGeometry(0, 0, 1499, 599)
+        self.listScroll.setGeometry(45, 250, 1523, 600)
         self.listScroll.setStyleSheet(
             "background-color: black;"
             
         )
+
+        self.listWidget = QtWidgets.QWidget(self.listScroll)
+        self.listWidget.setGeometry(0, 0, 1500, 600)
+        self.listWidget.setStyleSheet(
+            "background-color: black;"
+        )
+        self.listScroll.setWidget(self.listWidget)
+
         
 
         self.stackedWidget.addWidget(self.playlistPage)
@@ -449,6 +451,6 @@ if __name__ == "__main__":
 
     test = MainUi()
     test.setupUi()
-    test.stackedWidget.setCurrentIndex(3)
+    test.stackedWidget.setCurrentIndex(2)
 
     sys.exit(app.exec_())
