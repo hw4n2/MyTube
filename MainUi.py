@@ -297,10 +297,9 @@ class MainUi(object):
 
         
         self.listScroll = QtWidgets.QScrollArea(self.playlistPage)
-        self.listScroll.setGeometry(45, 250, 1523, 600)
+        self.listScroll.setGeometry(45, 250, 1523, 605)
         self.listScroll.setStyleSheet(
             "background-color: black;"
-            
         )
 
         self.listWidget = QtWidgets.QWidget(self.listScroll)
@@ -309,7 +308,6 @@ class MainUi(object):
             "background-color: black;"
         )
         self.listScroll.setWidget(self.listWidget)
-
         
 
         self.stackedWidget.addWidget(self.playlistPage)
@@ -357,9 +355,28 @@ class MainUi(object):
         self.curVideoTitle.setText("untitled")
 
         self.videoScroll = QtWidgets.QScrollArea(self.playerPage)
-        self.videoScroll.setGeometry(1152, 0, 448, 900)
+        self.videoScroll.setGeometry(1152, 30, 448, 900)
         self.videoScroll.setStyleSheet(
             "background-color: white;"
+        )
+
+        self.inScroll = QtWidgets.QWidget(self.videoScroll)
+        self.inScroll.setGeometry(0, 0, 448, 900)
+        self.inScroll.setStyleSheet(
+            "background-color: black;"
+        )
+        self.videoScroll.setWidget(self.inScroll)
+
+        self.listTitle = QtWidgets.QLabel(self.playerPage)
+        self.listTitle.setGeometry(1152, 0, 448, 30)
+        font = QtGui.QFont()
+        font.setFamily("맑은 고딕")
+        font.setPointSize(14)
+        self.listTitle.setFont(font)
+        self.listTitle.setAlignment(QtCore.Qt.AlignCenter)
+        self.listTitle.setStyleSheet(
+            "background-color: black;"
+            "color: white;"
         )
 
         self.playBtn = QtWidgets.QPushButton(self.playerPage)
