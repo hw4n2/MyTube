@@ -20,14 +20,14 @@ class Ani:
         ani.start()
 
         
-        if obj.iconSize() == QtCore.QSize(160, 160):
-            obj.setIconSize(QtCore.QSize(168, 168))
+        # if obj.iconSize() == QtCore.QSize(160, 160):
+        #     obj.setIconSize(QtCore.QSize(168, 168))
 
-        elif obj.iconSize() == QtCore.QSize(120, 120):
-            obj.setIconSize(QtCore.QSize(128, 128))
+        # elif obj.iconSize() == QtCore.QSize(120, 120):
+        #     obj.setIconSize(QtCore.QSize(128, 128))
 
-        elif obj.iconSize() == QtCore.QSize(60, 60):
-            obj.setIconSize(QtCore.QSize(68, 68))
+        # elif obj.iconSize() == QtCore.QSize(60, 60):
+        #     obj.setIconSize(QtCore.QSize(68, 68))
 
     def minimizeAnimation(self, event, ani, x, y, w, h, obj):
         ani.setStartValue(QtCore.QRect(x - 2, y - 2, w + 4, h + 4))
@@ -35,13 +35,13 @@ class Ani:
         ani.setDuration(30)
         ani.start()
 
-        if obj.iconSize() == QtCore.QSize(168, 168):
-            obj.setIconSize(QtCore.QSize(160, 160))
+        # if obj.iconSize() == QtCore.QSize(168, 168):
+        #     obj.setIconSize(QtCore.QSize(160, 160))
 
-        elif obj.iconSize() == QtCore.QSize(128, 128):
-            obj.setIconSize(QtCore.QSize(120, 120))
+        # elif obj.iconSize() == QtCore.QSize(128, 128):
+        #     obj.setIconSize(QtCore.QSize(120, 120))
 
-        elif obj.iconSize() == QtCore.QSize(68, 68):
-            obj.setIconSize(QtCore.QSize(60, 60))
+        # elif obj.iconSize() == QtCore.QSize(68, 68):
+        #     obj.setIconSize(QtCore.QSize(60, 60))
 
         

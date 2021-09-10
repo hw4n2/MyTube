@@ -258,7 +258,7 @@ class MainUi(object):
         self.userIcon.setPixmap(pixmap)
 
         self.idShowLabel = QtWidgets.QLabel(self.playlistPage)
-        self.idShowLabel.setGeometry(1430, 30, 150, 25)
+        self.idShowLabel.setGeometry(1430, 25, 150, 25)
         font = QtGui.QFont()
         font.setPointSize(14)
         font.setFamily("맑은 고딕")

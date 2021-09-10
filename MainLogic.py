@@ -12,7 +12,6 @@ class ProgramStart:
         self.newPlaylist = Playlist.Playlist(self.ui)
         self.newPlayer = Player.Player(self.ui)
         self.newAni = Animation.Ani()
-
         
         self.ui.stackedWidget.setCurrentIndex(0)
         self.ui.loginButton.clicked.connect(self.login)
@@ -27,12 +26,16 @@ class ProgramStart:
         self.msgbox.setStyleSheet("QMessageBox {background-color: white}")
         self.msgbox.setGeometry(850, 400, 200, 200)
 
+        loginAni = QtCore.QPropertyAnimation(ui.loginButton, b"geometry")
+        self.ui.loginButton.enterEvent = lambda event, a = loginAni, x = self.ui.loginButton.x(), y = self.ui.loginButton.y(), w = self.ui.loginButton.width(), h = self.ui.loginButton.height(): self.newAni.expandAnimation(event, a, x, y, w, h, self.ui.loginButton)
+        self.ui.loginButton.leaveEvent = lambda event, a = loginAni, x = self.ui.loginButton.x(), y = self.ui.loginButton.y(), w = self.ui.loginButton.width(), h = self.ui.loginButton.height(): self.newAni.minimizeAnimation(event, a, x, y, w, h, self.ui.loginButton)
+
     def login(self):
         self.id = self.ui.idInput.text()
         pwValue = self.ui.pwInput.text()
 
         db = dbClass.UseDb()
-        data = db.select1Db('user', 'pwd', 'id', self.id)
+        data = db.select('user', ["pwd"], 'id', self.id)
     
         if len(self.id) == 0 or len(pwValue) == 0:
             self.msgbox.warning(self.msgbox, '로그인', '아이디 또는 비밀번호를 입력해 주세요', QMessageBox.Ok, QMessageBox.Ok) 

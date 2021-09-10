@@ -1,6 +1,5 @@
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
-import sqlite3
 
 import dbClass, Animation, MainLogic
 
@@ -17,15 +16,16 @@ class Register:
         self.ui.registerBtn.clicked.connect(self.registButtonClicked)
         self.ui.cancelBtn.clicked.connect(self.back)
 
-        # registerBtnAni = QtCore.QPropertyAnimation(self.ui.registerBtn, b"geometry")
-        # self.ui.registerBtn.enterEvent = lambda event, a = registerBtnAni, x = self.ui.registerBtn.x(), y = self.ui.registerBtn.y(), w = self.ui.registerBtn.width(), h = self.ui.registerBtn.height(): self.newAni.expandAnimation(event, a, x, y, w, h, ui.registerBtn)
-        # self.ui.registerBtn.leaveEvent = lambda event, a = registerBtnAni, x = self.ui.registerBtn.x(), y = self.ui.registerBtn.y(), w = self.ui.registerBtn.width(), h = self.ui.registerBtn.height(): self.newAni.minimizeAnimation(event, a, x, y, w, h, ui.registerBtn)
+        self.newAni = Animation.Ani()
+        registerBtnAni = QtCore.QPropertyAnimation(self.ui.registerBtn, b"geometry")
+        self.ui.registerBtn.enterEvent = lambda event, a = registerBtnAni, x = self.ui.registerBtn.x(), y = self.ui.registerBtn.y(), w = self.ui.registerBtn.width(), h = self.ui.registerBtn.height(): self.newAni.expandAnimation(event, a, x, y, w, h, self.ui.registerBtn)
+        self.ui.registerBtn.leaveEvent = lambda event, a = registerBtnAni, x = self.ui.registerBtn.x(), y = self.ui.registerBtn.y(), w = self.ui.registerBtn.width(), h = self.ui.registerBtn.height(): self.newAni.minimizeAnimation(event, a, x, y, w, h, self.ui.registerBtn)
 
-        # cancelBtnAni = QtCore.QPropertyAnimation(self.ui.cancelBtn, b"geometry")
-        # self.ui.cancelBtn.enterEvent = lambda event, a = cancelBtnAni, x = self.ui.cancelBtn.x(), y = self.ui.cancelBtn.y(), w = self.ui.cancelBtn.width(), h = self.ui.cancelBtn.height(): self.newAni.expandAnimation(event, a, x, y, w, h, ui.cancelBtn)
-        # self.ui.cancelBtn.leaveEvent = lambda event, a = cancelBtnAni, x = self.ui.cancelBtn.x(), y = self.ui.cancelBtn.y(), w = self.ui.cancelBtn.width(), h = self.ui.cancelBtn.height(): self.newAni.minimizeAnimation(event, a, x, y, w, h, ui.cancelBtn)
+        cancelBtnAni = QtCore.QPropertyAnimation(self.ui.cancelBtn, b"geometry")
+        self.ui.cancelBtn.enterEvent = lambda event, a = cancelBtnAni, x = self.ui.cancelBtn.x(), y = self.ui.cancelBtn.y(), w = self.ui.cancelBtn.width(), h = self.ui.cancelBtn.height(): self.newAni.expandAnimation(event, a, x, y, w, h, self.ui.cancelBtn)
+        self.ui.cancelBtn.leaveEvent = lambda event, a = cancelBtnAni, x = self.ui.cancelBtn.x(), y = self.ui.cancelBtn.y(), w = self.ui.cancelBtn.width(), h = self.ui.cancelBtn.height(): self.newAni.minimizeAnimation(event, a, x, y, w, h, self.ui.cancelBtn)
 
-        # self.newAni = Animation.Ani()
+        
 
     def idCheck(self):
         self.existCheck = 0
@@ -38,7 +38,8 @@ class Register:
 
         else:
             db = dbClass.UseDb()
-            data = db.select1Db('user', 'id', 'id', self.idValue)
+            data = db.select("user", ["id"], "id", self.idValue)
+            
             if len(data) != 0:
                 self.ui.isExistLabel.setText("사용중인 아이디")
                 self.ui.isExistLabel.setStyleSheet("color: red;")
@@ -88,12 +89,9 @@ class Register:
                 QMessageBox.warning(self.ui.registerPage, '회원가입', '비밀번호가 일치하지 않습니다.', QMessageBox.Ok, QMessageBox.Ok)
                 
             else:
-                conn = sqlite3.connect("UserDb.db")
-                cur = conn.cursor()
-
-                cur.execute("INSERT INTO user (id, pwd, nickname, phone) VALUES ('" + self.idValue + "', '" + pwValue + "', '" + nameValue + "', '" + phoneValue + "');")
-                conn.commit()
-                conn.close()
+                db = dbClass.UseDb()
+                db.insert("user", ["id", "pwd", "nickname", "phone"], [self.idValue, pwValue, nameValue, phoneValue])
+                
                 QMessageBox.about(self.ui.registerPage, '회원가입', '회원가입이 완료되었습니다.\n로그인해 주세요.')
                 for i in range(0, 5):
                     self.ui.infoInput[i].setText("")

@@ -1,8 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
-import sqlite3
 
-from sip import delete
+import Animation
 
 import ModifyWindow
 
@@ -28,6 +27,20 @@ class Playlist:
         self.modWin.pwInput.returnPressed.connect(self.modWin.okBtnClicked)
         self.modWin.cancelBtn.clicked.connect(self.modWin.cancelClicked)
         self.modWin.finModify.clicked.connect(self.modWin.finModClicked)
+
+        self.newAni = Animation.Ani()
+        logoutBtnAni = QtCore.QPropertyAnimation(self.ui.logoutBtn, b"geometry")
+        self.ui.logoutBtn.enterEvent = lambda event, a = logoutBtnAni, x = self.ui.logoutBtn.x(), y = self.ui.logoutBtn.y(), w = self.ui.logoutBtn.width(), h = self.ui.logoutBtn.height(): self.newAni.expandAnimation(event, a, x, y, w, h, self.ui.logoutBtn)
+        self.ui.logoutBtn.leaveEvent = lambda event, a = logoutBtnAni, x = self.ui.logoutBtn.x(), y = self.ui.logoutBtn.y(), w = self.ui.logoutBtn.width(), h = self.ui.logoutBtn.height(): self.newAni.minimizeAnimation(event, a, x, y, w, h, self.ui.logoutBtn)
+
+        modifyBtnAni = QtCore.QPropertyAnimation(self.ui.modifyInfoBtn, b"geometry")
+        self.ui.modifyInfoBtn.enterEvent = lambda event, a = modifyBtnAni, x = self.ui.modifyInfoBtn.x(), y = self.ui.modifyInfoBtn.y(), w = self.ui.modifyInfoBtn.width(), h = self.ui.modifyInfoBtn.height(): self.newAni.expandAnimation(event, a, x, y, w, h, self.ui.modifyInfoBtn)
+        self.ui.modifyInfoBtn.leaveEvent = lambda event, a = modifyBtnAni, x = self.ui.modifyInfoBtn.x(), y = self.ui.modifyInfoBtn.y(), w = self.ui.modifyInfoBtn.width(), h = self.ui.modifyInfoBtn.height(): self.newAni.minimizeAnimation(event, a, x, y, w, h, self.ui.modifyInfoBtn)
+
+        addBtnAni = QtCore.QPropertyAnimation(self.ui.addListBtn, b"geometry")
+        self.ui.addListBtn.enterEvent = lambda event, a = addBtnAni, x = self.ui.addListBtn.x(), y = self.ui.addListBtn.y(), w = self.ui.addListBtn.width(), h = self.ui.addListBtn.height(): self.newAni.expandAnimation(event, a, x, y, w, h, self.ui.addListBtn)
+        self.ui.addListBtn.leaveEvent = lambda event, a = addBtnAni, x = self.ui.addListBtn.x(), y = self.ui.addListBtn.y(), w = self.ui.addListBtn.width(), h = self.ui.addListBtn.height(): self.newAni.minimizeAnimation(event, a, x, y, w, h, self.ui.addListBtn)
+
 
     def logoutClicked(self):
         choice = self.msgbox.question(self.msgbox, "로그아웃", "로그아웃하시겠습니까?", QMessageBox.No | QMessageBox.Yes, QMessageBox.No)

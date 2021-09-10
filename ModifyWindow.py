@@ -1,8 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
-import sqlite3
 
-import dbClass
+import dbClass, Animation
 
 
 class ModifyWindow(object):
@@ -166,16 +165,29 @@ class ModifyWindow(object):
 
             self.modStackedWidget.addWidget(self.modifyPage)
 
+            
+        self.newAni = Animation.Ani()
+        okBtnAni = QtCore.QPropertyAnimation(self.okBtn, b"geometry")
+        self.okBtn.enterEvent = lambda event, a = okBtnAni, x = self.okBtn.x(), y = self.okBtn.y(), w = self.okBtn.width(), h = self.okBtn.height(): self.newAni.expandAnimation(event, a, x, y, w, h, self.okBtn)
+        self.okBtn.leaveEvent = lambda event, a = okBtnAni, x = self.okBtn.x(), y = self.okBtn.y(), w = self.okBtn.width(), h = self.okBtn.height(): self.newAni.minimizeAnimation(event, a, x, y, w, h, self.okBtn)
+
+        cancelBtnAni = QtCore.QPropertyAnimation(self.cancelBtn, b"geometry")
+        self.cancelBtn.enterEvent = lambda event, a = cancelBtnAni, x = self.cancelBtn.x(), y = self.cancelBtn.y(), w = self.cancelBtn.width(), h = self.cancelBtn.height(): self.newAni.expandAnimation(event, a, x, y, w, h, self.cancelBtn)
+        self.cancelBtn.leaveEvent = lambda event, a = cancelBtnAni, x = self.cancelBtn.x(), y = self.cancelBtn.y(), w = self.cancelBtn.width(), h = self.cancelBtn.height(): self.newAni.minimizeAnimation(event, a, x, y, w, h, self.cancelBtn)
+
+        finishBtnAni = QtCore.QPropertyAnimation(self.finModify, b"geometry")
+        self.finModify.enterEvent = lambda event, a = finishBtnAni, x = self.finModify.x(), y = self.finModify.y(), w = self.finModify.width(), h = self.finModify.height(): self.newAni.expandAnimation(event, a, x, y, w, h, self.finModify)
+        self.finModify.leaveEvent = lambda event, a = finishBtnAni, x = self.finModify.x(), y = self.finModify.y(), w = self.finModify.width(), h = self.finModify.height(): self.newAni.minimizeAnimation(event, a, x, y, w, h, self.finModify)
+
+
     def okBtnClicked(self):
         pwValue = self.pwInput.text()
         if len(pwValue) == 0:
             self.msgbox.about(self.msgbox, "회원정보 수정", "비밀번호를 입력해 주세요.")
 
         else:
-            conn = sqlite3.connect("UserDb.db")
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM user WHERE id = '" + self.id + "';")
-            data = cur.fetchall()
+            db = dbClass.UseDb()
+            data = db.select("user", ["*"], "id", self.id)
 
             if len(data) == 1:
                 if str(data[0][1]) == pwValue:
@@ -186,7 +198,6 @@ class ModifyWindow(object):
 
                     self.modStackedWidget.setCurrentIndex(1)
                     
-                
                 else:
                     self.msgbox.warning(self.msgbox, '회원정보 수정', '비밀번호를 확인해 주세요.')
                     self.pwInput.setText("")
@@ -208,16 +219,8 @@ class ModifyWindow(object):
         else:
             choice = self.msgbox.question(self.msgbox, "회원정보 수정", "수정하시겠습니까?", QMessageBox.No | QMessageBox.Yes, QMessageBox.No)
             if choice == QMessageBox.Yes:
-                conn = sqlite3.connect("UserDb.db")
-                cur = conn.cursor()
-
-                cur.execute("UPDATE user SET pwd = ? WHERE id = '" + self.id + "'", (self.infoInput[0].text(), ))
-                conn.commit()
-                cur.execute("UPDATE user SET nickname = ? WHERE id = '" + self.id + "'", (self.infoInput[2].text(), ))
-                conn.commit()
-                cur.execute("UPDATE user SET phone = ? WHERE id = '" + self.id + "'", (self.infoInput[3].text(), ))
-                conn.commit()
-                conn.close()
+                db = dbClass.UseDb()
+                db.update("user", ["pwd", "nickname", "phone"], [self.infoInput[0].text(), self.infoInput[2].text(), self.infoInput[3].text()], "id", self.id)
                 self.msgbox.about(self.msgbox, "회원정보 수정", "수정되었습니다.")
                 self.pwInput.setText("")
 
