@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 
 import Animation
 
-import ModifyWindow
+import ModifyWindow, Player
 
 class Playlist:
     
@@ -20,6 +20,8 @@ class Playlist:
         self.playList = []
         self.titleList = []
         self.listCount = 0
+
+        self.player = Player.Player(self.ui)
         
         self.modWin = ModifyWindow.ModifyWindow()
         self.modWin.setupUi()
@@ -69,7 +71,8 @@ class Playlist:
             "background-color: white;"
             "border-radius: 2px"
         )
-        self.playList.append(newList)
+        self.playList.append([])
+        self.playList[len(self.playList) - 1].append(newList)
 
         newTitle.setGeometry(newList.x(), newList.y() + 160, 285, 30)
         newTitle.setStyleSheet(
@@ -83,6 +86,7 @@ class Playlist:
         font.setPointSize(12)
         font.setFamily("맑은 고딕")
         newTitle.setFont(font)
+        newTitle.setMaxLength(14)
         self.titleList.append(newTitle)
 
         if 260 * ((self.listCount - 1) // 4 + 1) >= self.ui.listWidget.height():
@@ -107,12 +111,17 @@ class Playlist:
         if e.button() == QtCore.Qt.LeftButton:
             self.ui.stackedWidget.setCurrentIndex(3)
             self.ui.listTitle.setText(name)
+            self.player.videoList = []
+            self.player.videoCount = 0
         
         elif e.button() == QtCore.Qt.RightButton:
             pass
                 
     def deleteClicked(self, list, title):
-        index = self.playList.index(list)
+        for i in range(0, len(self.playList)):
+            if self.playList[i][0] == list:
+                index = i
+        
         list.close()
         title.close()
         self.listCount -= 1
@@ -124,13 +133,13 @@ class Playlist:
 
     def relocateWidget(self):
         for i in range(0, len(self.playList)):
-            self.playList[i].close()
+            self.playList[i][0].close()
             self.titleList[i].close()
 
         for i in range(0, len(self.playList)):
-            self.playList[i].setGeometry(90 + (i % 4) * 345, 50 + (i // 4) * 260, 285, 160)
-            self.titleList[i].setGeometry(self.playList[i].x(), self.playList[i].y() + 160, 285, 30)
-            self.playList[i].show()
+            self.playList[i][0].setGeometry(90 + (i % 4) * 345, 50 + (i // 4) * 260, 285, 160)
+            self.titleList[i].setGeometry(self.playList[i][0].x(), self.playList[i][0].y() + 160, 285, 30)
+            self.playList[i][0].show()
             self.titleList[i].show()
 
     def titleModifyEvent(self, title):

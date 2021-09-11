@@ -360,15 +360,15 @@ class MainUi(object):
             "background-color: white;"
         )
 
-        self.inScroll = QtWidgets.QWidget(self.videoScroll)
-        self.inScroll.setGeometry(0, 0, 448, 900)
-        self.inScroll.setStyleSheet(
+        self.videoListW = QtWidgets.QWidget(self.videoScroll)
+        self.videoListW.setGeometry(0, 0, 425, 900)
+        self.videoListW.setStyleSheet(
             "background-color: black;"
         )
-        self.videoScroll.setWidget(self.inScroll)
+        self.videoScroll.setWidget(self.videoListW)
 
         self.listTitle = QtWidgets.QLabel(self.playerPage)
-        self.listTitle.setGeometry(1152, 0, 448, 30)
+        self.listTitle.setGeometry(1152, 0, 308, 30)
         font = QtGui.QFont()
         font.setFamily("맑은 고딕")
         font.setPointSize(14)
@@ -378,6 +378,16 @@ class MainUi(object):
             "background-color: black;"
             "color: white;"
         )
+
+        self.addVideo = QtWidgets.QPushButton(self.playerPage)
+        self.addVideo.setGeometry(1460, 0, 140, 30)
+        self.addVideo.setStyleSheet(
+            "background-color: black;"
+            "color: white;"
+        )
+        self.addVideo.setText("+ 영상 추가")
+        self.addVideo.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
 
         self.playBtn = QtWidgets.QPushButton(self.playerPage)
         self.playBtn.setGeometry(10, 820, 60, 60)
@@ -431,7 +441,6 @@ class MainUi(object):
 
 
         self.retranslateUi(self.MainWindow)
-        self.stackedWidget.setCurrentIndex(0)
         self.MainWindow.show()
 
     
@@ -468,6 +477,6 @@ if __name__ == "__main__":
 
     test = MainUi()
     test.setupUi()
-    test.stackedWidget.setCurrentIndex(2)
+    test.stackedWidget.setCurrentIndex(3)
 
     sys.exit(app.exec_())
