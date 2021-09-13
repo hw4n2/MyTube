@@ -2,7 +2,7 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 
-import MainUi, Register, Playlist, Player, Animation, dbClass
+import MainUi, Register, Playlist, Animation, dbClass
 
 class ProgramStart:
     
@@ -10,7 +10,6 @@ class ProgramStart:
         self.ui = ui
         self.newRegister = Register.Register(self.ui)
         self.newPlaylist = Playlist.Playlist(self.ui)
-        self.newPlayer = Player.Player(self.ui)
         self.newAni = Animation.Ani()
         
         self.ui.stackedWidget.setCurrentIndex(0)
