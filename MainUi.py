@@ -380,14 +380,22 @@ class MainUi(object):
         )
 
         self.addVideo = QtWidgets.QPushButton(self.playerPage)
-        self.addVideo.setGeometry(1460, 0, 140, 30)
+        self.addVideo.setGeometry(1460, 0, 80, 30)
         self.addVideo.setStyleSheet(
             "background-color: black;"
             "color: white;"
         )
-        self.addVideo.setText("+ 영상 추가")
+        self.addVideo.setText("+추가")
         self.addVideo.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
+        self.saveBtn = QtWidgets.QPushButton(self.playerPage)
+        self.saveBtn.setGeometry(1540, 0, 60, 30)
+        self.saveBtn.setStyleSheet(
+            "background-color: red;"
+            "color: white;"
+        )
+        self.saveBtn.setText("SAVE")
+        self.saveBtn.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
         self.playBtn = QtWidgets.QPushButton(self.playerPage)
         self.playBtn.setGeometry(10, 820, 60, 60)

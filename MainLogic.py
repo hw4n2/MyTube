@@ -9,8 +9,8 @@ class ProgramStart:
     def __init__(self, ui):
         self.ui = ui
         self.newRegister = Register.Register(self.ui)
-        self.newPlaylist = Playlist.Playlist(self.ui)
         self.newAni = Animation.Ani()
+        self.newPlaylist = Playlist.Playlist(self.ui)
         
         self.ui.stackedWidget.setCurrentIndex(0)
         self.ui.loginButton.clicked.connect(self.login)
@@ -43,7 +43,9 @@ class ProgramStart:
             if str(data[0][0]) == pwValue:
                 self.ui.stackedWidget.setCurrentIndex(2)
                 self.ui.idShowLabel.setText(self.id)
+                print(self.id)
                 self.newPlaylist.setId(self.id)
+                self.newPlaylist.loadFromData()
             
             else:
                 self.msgbox.warning(self.msgbox, '로그인', '아이디 또는 비밀번호를 확인해 주세요.', QMessageBox.Ok, QMessageBox.Ok)

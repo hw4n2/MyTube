@@ -1,9 +1,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
+from youtubesearchpython import VideosSearch
+import random
 
-import Animation
-
-import ModifyWindow, Player
+import ModifyWindow, Player, dbClass, Animation
 
 class Playlist:
     
@@ -17,9 +17,12 @@ class Playlist:
         self.ui.logoutBtn.clicked.connect(self.logoutClicked)
         self.ui.modifyInfoBtn.clicked.connect(self.modifyClicked)
         self.ui.addListBtn.clicked.connect(self.addClicked)
+        self.ui.saveBtn.clicked.connect(self.saveClicked)
         self.playList = []
         self.titleList = []
         self.listCount = 0
+
+        self.saveBtnList = []
 
         self.player = Player.Player(self.ui)
         
@@ -80,7 +83,7 @@ class Playlist:
             "color: white;"
             "border: black;"
         )
-        newTitle.setText("새 재생목록 " + str(self.listCount))
+        newTitle.setText("새 재생목록 " + str(random.randint(0, 999999)))
         newTitle.setEnabled(False)
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -92,7 +95,7 @@ class Playlist:
         if 260 * ((self.listCount - 1) // 4 + 1) >= self.ui.listWidget.height():
             self.ui.listWidget.setGeometry(0, 0, 1500, self.ui.listWidget.height() + 300)
 
-        newList.mousePressEvent = lambda e, n = newTitle.text(): self.listClicked(e, n)
+        newList.mousePressEvent = lambda e, list = newList, title = newTitle: self.listClicked(e, list, title)
         newTitle.returnPressed.connect(lambda : self.modifyReturnPressed(newTitle))
 
         newList.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
@@ -103,16 +106,39 @@ class Playlist:
         deleteAction.triggered.connect(lambda: self.deleteClicked(newList, newTitle))
         modifyAction.triggered.connect(lambda: self.titleModifyEvent(newTitle))
 
+        db = dbClass.UseDb()
+        db.insert(self.id, ["listname"], [newTitle.text()])
+
         newList.show()
         newTitle.show()
 
 
-    def listClicked(self, e, name):
+    def listClicked(self, e, list, title):
         if e.button() == QtCore.Qt.LeftButton:
             self.ui.stackedWidget.setCurrentIndex(3)
-            self.ui.listTitle.setText(name)
-            self.player.videoList = []
-            self.player.videoCount = 0
+            self.ui.listTitle.setText(title.text())
+            
+
+            for i in range(0, len(self.playList)):
+                if self.playList[i][0] == list:
+                    index = i
+                    break
+            
+            
+            
+            if len(self.playList[index]) != 1:
+                self.player.loadURL.clear()
+                for i in range(0, len(self.playList[index]) - 1):
+                    self.player.loadURL.append(self.playList[index][i + 1])
+
+                self.player.curList_index = index
+                self.player.relocateVideo()
+
+            else:
+                self.player.curList_index = index
+                self.player.clearWidget()
+                self.msgbox.about(self.msgbox, "영상 추가", "재생목록이 비었습니다.")
+                
         
         elif e.button() == QtCore.Qt.RightButton:
             pass
@@ -125,6 +151,10 @@ class Playlist:
         list.close()
         title.close()
         self.listCount -= 1
+
+        db = dbClass.UseDb()
+        db.delete(self.id, "listname", self.titleList[index].text())
+
 
         del self.playList[index]
         del self.titleList[index]
@@ -150,6 +180,8 @@ class Playlist:
             "color: black;"
         )
 
+        self.tempTitle = self.titleList[index].text()
+
     def modifyReturnPressed(self, title):
         index = self.titleList.index(title)
         self.titleList[index].setStyleSheet(
@@ -160,10 +192,124 @@ class Playlist:
         self.titleList[index].setText(self.titleList[index].text())
         self.titleList[index].setEnabled(False)
 
+        db = dbClass.UseDb()
+        db.update(self.id, ["listname"], [self.titleList[index].text()], "listname", self.tempTitle)
+        self.tempTitle = ""
+
     def setId(self, id):
         self.id = id
 
+    def saveClicked(self):
+        if len(self.player.URL) != 0:
+            index = self.player.curList_index
+            db = dbClass.UseDb()
+            data = db.select(self.id, ["*"], "listname", self.titleList[index].text())
+
+            tempurl = []
+            for k in range(0, len(data[0]) - 1):
+                if data[0][k + 1] == None:
+                    continue
+                tempurl.append(data[0][k + 1])
+
+            for i in range(0, len(self.player.URL)):
+                tempurl.append(self.player.URL[i])
+                self.playList[index].append(self.player.URL[i])
+
+            db.delete(self.id, "listname", self.titleList[index].text())
+            db.insert(self.id, ["listname"], [self.titleList[index].text()])
+            for j in range(0, len(tempurl)):
+                db.update(self.id, ["v" + str(j)], [tempurl[j]], "listname", self.titleList[index].text())
+                
+
+            self.player.relocateVideo()
+                
+            self.player.URL.clear()
+            self.player.search.returnURL.clear()
 
 
-    
+            
+            self.msgbox.about(self.msgbox, "저장", "저장 완료")
+            
+        else:
+            self.msgbox.about(self.msgbox, "저장", "변경사항이 없습니다.")
+
+    def loadFromData(self):
+        for i in range(0, len(self.titleList)):
+            self.titleList[i].close()
+            self.playList[i][0].close()
+
+        db = dbClass.UseDb()
+        data = db.select(self.id, ["*"], None, ".")
+        self.titleList.clear()
+        self.playList.clear()
+
+        self.listCount = 0
+        self.loadedTitle = []
+        for i in range(0, len(data)):
+            self.loadedTitle.append(data[i][0])
+            self.recreateList(i, data)
+
+        self.player.setId(self.id)
+
         
+
+
+    def recreateList(self, index, data):
+        self.listCount += 1
+        newList = QtWidgets.QLabel(self.ui.listWidget)
+        newTitle = QtWidgets.QLineEdit(self.ui.listWidget)
+        
+        newList.setGeometry(90 + (index % 4) * 345, 50 + (index // 4) * 260, 285, 160)
+        newList.setStyleSheet(
+            "background-color: white;"
+            "border-radius: 2px"
+        )
+        self.playList.append([])
+        self.playList[len(self.playList) - 1].append(newList)
+        for i in range(0, len(data[index]) - 1):
+            if data[index][i + 1] == None:
+                continue
+            self.playList[len(self.playList) - 1].append(data[index][i + 1])
+
+
+        url = 
+        video = pafy.new(url)
+        thumbUrl = video.thumb
+        thumbnail = urllib.request.urlopen(thumbUrl).read()
+        pixmap = QtGui.QPixmap()
+        pixmap.loadFromData(thumbnail)
+        pixmap = pixmap.scaled(340, 220)
+
+        newTitle.setGeometry(newList.x(), newList.y() + 160, 285, 30)
+        newTitle.setStyleSheet(
+            "background-color: black;"
+            "color: white;"
+            "border: black;"
+        )
+        newTitle.setText(self.loadedTitle[index])
+        newTitle.setEnabled(False)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        font.setFamily("맑은 고딕")
+        newTitle.setFont(font)
+        newTitle.setMaxLength(14)
+        self.titleList.append(newTitle)
+
+        if 260 * (index // 4 + 1) >= self.ui.listWidget.height():
+            self.ui.listWidget.setGeometry(0, 0, 1500, self.ui.listWidget.height() + 300)
+
+        newList.mousePressEvent = lambda e, list = newList, title = newTitle: self.listClicked(e, list, title)
+        newTitle.returnPressed.connect(lambda : self.modifyReturnPressed(newTitle))
+
+        newList.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+        deleteAction = QAction("삭제", newList)
+        modifyAction = QAction("이름 수정", newList)
+        newList.addAction(deleteAction)
+        newList.addAction(modifyAction)
+        deleteAction.triggered.connect(lambda: self.deleteClicked(newList, newTitle))
+        modifyAction.triggered.connect(lambda: self.titleModifyEvent(newTitle))
+
+        
+
+        newList.show()
+        newTitle.show()

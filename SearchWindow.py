@@ -34,7 +34,7 @@ class SearchWindow(object):
         self.searchScr.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
         self.inscr = QtWidgets.QWidget(self.searchScr)
-        self.inscr.setGeometry(0, 0, 1000, 1300)
+        self.inscr.setGeometry(0, 0, 1000, 2400)
         self.inscr.setStyleSheet(
             "background-color: black;"
         )
@@ -82,9 +82,7 @@ class SearchWindow(object):
         self.finBtn.setFont(font)
         self.finBtn.setText("확인")
 
-    
-
-    def searchClicked(self):
+    def searchClicked(self, e):
         search = VideosSearch(self.searchEdit.text(), limit=5)
         searchList = search.result()
         resultList = []
@@ -113,11 +111,10 @@ class SearchWindow(object):
             )
             newVideo.setPixmap(pixmap)
             newVideo.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-            newVideo.setText(url)
 
 
             newTitle = QtWidgets.QLabel(self.inscr)
-            newTitle.setGeometry(350, 10 + 225 * i, 620, 220)
+            newTitle.setGeometry(350, 10 + 225 * i, 620, 200)
             newTitle.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
             newTitle.setStyleSheet(
                 "background-color: black;"
@@ -127,27 +124,36 @@ class SearchWindow(object):
             font.setPointSize(12)
             font.setFamily("맑은 고딕")
             newTitle.setFont(font)
+
+            newurl = QtWidgets.QLabel(self.inscr)
+            newurl.setGeometry(350, 210 + 225 * i, 620, 20)
+            newurl.setStyleSheet(
+                "background-color: black;"
+                "color: black;"
+            )
+            newurl.setText(url)
+            
             
             finalTitle = self.cutTitle(video)
             newTitle.setText(finalTitle)
 
-            newVideo.mousePressEvent = lambda e, v = newVideo, l = newTitle: self.videoClicked(e, v, l)
-            newTitle.mousePressEvent = lambda e, v = newVideo, l = newTitle: self.videoClicked(e, v, l)
+            newVideo.mousePressEvent = lambda e, v = newVideo, t = newTitle, u = newurl: self.videoClicked(e, v, t, u)
+            newTitle.mousePressEvent = lambda e, v = newVideo, t = newTitle, u = newurl: self.videoClicked(e, v, t, u)
 
             newVideo.show()
             newTitle.show()
+            newurl.show()
             self.videoList.append(newVideo)
             self.titleList.append(newTitle)
             
-
     def cutTitle(self,video):
         titleString = video.title
         cutStr = []
         for i in range(0, len(titleString) + 1):
-            if len(titleString) > 40:
+            if len(titleString) > 30:
                 try:
-                    cutStr.append(titleString[:40])
-                    titleString = titleString[40:]  
+                    cutStr.append(titleString[:30])
+                    titleString = titleString[30:]  
                 except:
                     cutStr.append(titleString)
             else: 
@@ -161,10 +167,10 @@ class SearchWindow(object):
         finalTitle += "\n" + video.author
         return finalTitle
 
-    def videoClicked(self, e, video, label):
+    def videoClicked(self, e, video, title, url):
         index = None
         for i in range(0, len(self.returnURL)):
-            if self.returnURL[i] == video.text():
+            if self.returnURL[i] == url.text():
                 index = i
 
         if index == None:
@@ -173,10 +179,11 @@ class SearchWindow(object):
                 pass
             
             elif choice == QMessageBox.Yes:
-                label.setStyleSheet(
+                title.setStyleSheet(
                     "background-color: grey;"
+                    "color: white;"
                 )
-                self.returnURL.append(video.text())
+                self.returnURL.append(url.text())
         
         elif index != None:
             choice = self.msgbox.question(self.msgbox, "장바구니", "취소하시겠습니까?", QMessageBox.No | QMessageBox.Yes, QMessageBox.No)
@@ -185,7 +192,7 @@ class SearchWindow(object):
                 pass
             
             elif choice == QMessageBox.Yes:
-                label.setStyleSheet(
+                title.setStyleSheet(
                     "background-color: black;"
                     "color: white;"
                 )

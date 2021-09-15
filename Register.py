@@ -1,7 +1,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 
-import dbClass, Animation, MainLogic
+import dbClass, Animation, Playlist
 
  
 class Register:
@@ -91,6 +91,9 @@ class Register:
             else:
                 db = dbClass.UseDb()
                 db.insert("user", ["id", "pwd", "nickname", "phone"], [self.idValue, pwValue, nameValue, phoneValue])
+                db.addTable(self.idValue)
+                for i in range(0, 10):
+                    db.addCol(self.idValue, i)
                 
                 QMessageBox.about(self.ui.registerPage, '회원가입', '회원가입이 완료되었습니다.\n로그인해 주세요.')
                 for i in range(0, 5):

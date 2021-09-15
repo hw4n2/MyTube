@@ -1,8 +1,6 @@
-from youtubesearchpython import VideosSearch
+import sqlite3
 
-search = VideosSearch("파이썬", limit=5)
-resultList = []
-resultdic = search.result()
-for i in range(0, 5):
-    resultList.append(resultdic['result'][i]['link'])
-print(resultList)
+conn = sqlite3.connect("UserDb.db")
+cur = conn.cursor()
+
+cur.execute("CREATE TABLE test ( CHAR(50));")
