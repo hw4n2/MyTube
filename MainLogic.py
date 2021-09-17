@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 
 import MainUi, Register, Playlist, Animation, dbClass
-
+ 
 class ProgramStart:
     
     def __init__(self, ui):

@@ -1,7 +1,7 @@
 import sqlite3
 
 class DbInit:
-
+ 
     def __init__(self):
         self.conn = sqlite3.connect("UserDb.db")
         self.cur = self.conn.cursor()

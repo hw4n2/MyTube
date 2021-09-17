@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 from youtubesearchpython import VideosSearch
 import pafy, urllib.request
 import random
-
+ 
 import ModifyWindow, Player, dbClass, Animation
 
 class Playlist:
@@ -118,13 +118,14 @@ class Playlist:
         if e.button() == QtCore.Qt.LeftButton:
             self.ui.stackedWidget.setCurrentIndex(3)
             self.ui.listTitle.setText(title.text())
-            
+
             for i in range(0, len(self.playList)):
                 if self.playList[i][0] == list:
                     index = i
                     break
             
             self.player.curListTitle = self.titleList[index].text()
+            self.loadFromData()
             
             
             if len(self.playList[index]) != 1:
@@ -133,7 +134,8 @@ class Playlist:
                     self.player.loadURL.append(self.playList[index][i + 1])
 
                 self.player.curList_index = index
-                self.player.relocateVideo()
+                for i in range(0, len(self.player.loadURL)):
+                    self.player.relocateVideo(i)
 
             else:
                 self.player.curList_index = index
@@ -160,7 +162,8 @@ class Playlist:
         del self.playList[index]
         del self.titleList[index]
 
-        self.relocateWidget()
+        for i in range(0, len(self.player.loadURL)):
+            self.player.relocateVideo(i)
 
     def relocateWidget(self):
         for i in range(0, len(self.playList)):
@@ -223,7 +226,8 @@ class Playlist:
                     db.update(self.id, ["v" + str(j)], [None], "listname", self.titleList[index].text())
 
 
-            self.player.relocateVideo()
+            for i in range(0, len(self.player.loadURL)):
+                self.player.relocateVideo(i)
                 
             self.player.URL.clear()
             self.player.search.returnURL.clear()

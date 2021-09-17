@@ -4,7 +4,7 @@ import pafy,urllib.request
 
 import SearchWindow, dbClass
 
-
+ 
 class Player:
     
     def __init__(self, ui):
@@ -63,65 +63,72 @@ class Player:
                 self.ui.videoListW.setGeometry(0, 0, 425, self.ui.videoListW.height() + 130)
             self.loadURL.append(self.URL[i])
 
-        self.relocateVideo()
+        for i in range(0, len(self.loadURL)):
+            self.relocateVideo(i)
 
 
 
-    def relocateVideo(self):
-        for i in range(0, len(self.videoList)):
-            self.videoList[i].close()
-            self.titleList[i].close()
-        self.videoList.clear()
-        self.titleList.clear()
+    def relocateVideo(self, index):
+        if index == 0:
+            for i in range(0, len(self.videoList)):
+                self.videoList[i].close()
+                self.titleList[i].close()
+            self.videoList.clear()
+            self.titleList.clear()
         
 
-        for i in range(0, len(self.loadURL)):
-            if len(self.loadURL) >= 7 and i >= 7:
-                self.ui.videoListW.setGeometry(0, 0, 425, self.ui.videoListW.height() + 130)
+        
+        if index >= 7:
+            self.ui.videoListW.setGeometry(0, 0, 425, self.ui.videoListW.height() + 130)
 
-            url = self.loadURL[i]
-            video = pafy.new(url)
-            thumbUrl = video.thumb
-            thumbnail = urllib.request.urlopen(thumbUrl).read()
-            pixmap = QtGui.QPixmap()
-            pixmap.loadFromData(thumbnail)
-            pixmap = pixmap.scaled(170, 120)
+        url = self.loadURL[index]
+        video = pafy.new(url)
+        thumbUrl = video.thumb
+        thumbnail = urllib.request.urlopen(thumbUrl).read()
+        pixmap = QtGui.QPixmap()
+        pixmap.loadFromData(thumbnail)
+        pixmap = pixmap.scaled(170, 120)
 
-            newVideo = QtWidgets.QLabel(self.ui.videoListW)
-            newVideo.setGeometry(0, 10 + 125 * i, 170, 120)
-            newVideo.setStyleSheet(
-                "background-color: white;"
-                "border-radius: 2px"
-            )
-            newVideo.setPixmap(pixmap)
+        newVideo = QtWidgets.QLabel(self.ui.videoListW)
+        newVideo.setGeometry(0, 10 + 125 * index, 170, 120)
+        newVideo.setStyleSheet(
+            "background-color: white;"
+            "border-radius: 2px"
+        )
+        newVideo.setPixmap(pixmap)
 
-            newTitle = QtWidgets.QLabel(self.ui.videoListW)
-            newTitle.setGeometry(170, 10 + 125 * i, 255, 120)
-            newTitle.setStyleSheet(
-                "background-color: black;"
-                "color: white;"
-            )
-            font = QtGui.QFont()
-            font.setPointSize(9)
-            font.setFamily("맑은 고딕")
-            newTitle.setFont(font)
+        newTitle = QtWidgets.QLabel(self.ui.videoListW)
+        newTitle.setGeometry(170, 10 + 125 * index, 255, 120)
+        newTitle.setStyleSheet(
+            "background-color: black;"
+            "color: white;"
+        )
+        font = QtGui.QFont()
+        font.setPointSize(9)
+        font.setFamily("맑은 고딕")
+        newTitle.setFont(font)
+        
+        finalTitle = self.cutTitle(video)
+        newTitle.setText(finalTitle)
+
+        self.videoList.append(newVideo)
+        self.titleList.append(newTitle)
+
+        newVideo.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+        newTitle.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+        deleteActionV = QAction("삭제", newVideo)
+        deleteActionT = QAction("삭제", newTitle)
+        newVideo.addAction(deleteActionV)
+        newTitle.addAction(deleteActionT)
+        v = newVideo
+        t = newTitle
+        u = url
+        deleteActionV.triggered.connect(lambda: self.deleteClicked(v, t, u))
+        deleteActionT.triggered.connect(lambda: self.deleteClicked(v, t, u))
+        newVideo.show()
+        newTitle.show()
+
             
-            finalTitle = self.cutTitle(video)
-            newTitle.setText(finalTitle)
-
-            newVideo.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-            newTitle.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-            deleteActionV = QAction("삭제", newVideo)
-            deleteActionT = QAction("삭제", newTitle)
-            newVideo.addAction(deleteActionV)
-            newTitle.addAction(deleteActionT)
-            deleteActionV.triggered.connect(lambda: self.deleteClicked(newVideo, newTitle, url))
-            deleteActionT.triggered.connect(lambda: self.deleteClicked(newVideo, newTitle, url))
-
-            newVideo.show()
-            newTitle.show()
-            self.videoList.append(newVideo)
-            self.titleList.append(newTitle)
 
     def cutTitle(self,video):
         titleString = video.title
@@ -160,7 +167,6 @@ class Player:
         title.close()
 
         db = dbClass.UseDb()
-        # db.delete(self.id, "v" + str(index), url)
         db.update(self.id, ["v" + str(index)], [None], "v" + str(index), url)
 
         self.msgbox.about(self.msgbox, "삭제", "삭제되었습니다.")
@@ -187,7 +193,9 @@ class Player:
             else:
                 db.update(self.id, ["v" + str(j)], [None], "listname", self.curListTitle)
 
-        self.relocateVideo()
+        for i in range(0, len(self.loadURL)):
+            self.relocateVideo(i)
 
     def setId(self, id):
         self.id = id
+

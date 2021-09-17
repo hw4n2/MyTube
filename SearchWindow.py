@@ -4,7 +4,7 @@ import pafy, urllib.request
 from youtubesearchpython import VideosSearch
 
 class SearchWindow(object):
-    
+     
     def __init__(self):
         self.msgbox = QMessageBox()
         self.msgbox.setStyleSheet("QMessageBox {background-color: white}")

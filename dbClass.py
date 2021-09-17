@@ -58,7 +58,7 @@ class UseDb:
 
         conn.commit()
         conn.close()
-
+ 
     def update(self, table, columns, values, where, value):
         conn = sqlite3.connect("UserDb.db")
         cur = conn.cursor()
@@ -83,6 +83,22 @@ class UseDb:
 
         conn.commit()
         conn.close()
+
+
+    def addTable(self, id, num):
+        conn = sqlite3.connect("UserDb.db")
+        cur = conn.cursor()
+
+        sqlstring = "CREATE TABLE " + id + "(listname VARCHAR(20), "
+        for i in range(0, num):
+            sqlstring += "v" + str(i) + " CHAR(50), "
+        
+        sqlstring = sqlstring[:-2]
+        sqlstring += ")"
+        cur.execute(sqlstring)
+        
+
+            
 
     # def update(self, table, columns, values, where, value):
     #     conn = sqlite3.connect("UserDb.db")
