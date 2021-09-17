@@ -62,28 +62,39 @@ class UseDb:
     def update(self, table, columns, values, where, value):
         conn = sqlite3.connect("UserDb.db")
         cur = conn.cursor()
+        noneControl = False
 
         sqlstring = "UPDATE " + table + " SET "
         for i in range(0, len(columns)):
-            sqlstring += columns[i] + " = '" + values[i] + "', "
+            if values[i] != None:
+                sqlstring += columns[i] + " = '" + values[i] + "', "
+            else:
+                sqlstring += columns[i] + " = ?, "
+                noneControl = True
+
         
         sqlstring = sqlstring[:-2]
-        sqlstring += " WHERE " + where + " = '" + value + "';"
+        sqlstring += " WHERE " + where + " = '" + value + "'"
 
-        cur.execute(sqlstring)
+        if noneControl == False:
+            cur.execute(sqlstring)
+        else:
+            cur.execute(sqlstring, (None,))
+
         conn.commit()
         conn.close()
 
-    def addTable(self, tableName):
-        conn = sqlite3.connect("UserDb.db")
-        cur = conn.cursor()
+    # def update(self, table, columns, values, where, value):
+    #     conn = sqlite3.connect("UserDb.db")
+    #     cur = conn.cursor()
 
-        cur.execute("CREATE TABLE " + tableName + "(listname VARCHAR(20));")
+    #     sqlstring = "UPDATE " + table + " SET "
+    #     for i in range(0, len(columns)):
+    #         sqlstring += columns[i] + " = '" + values[i] + "', "
+        
+    #     sqlstring = sqlstring[:-2]
+    #     sqlstring += " WHERE " + where + " = '" + value + "';"
 
-    def addCol(self, table, num):
-        conn = sqlite3.connect("UserDb.db")
-        cur = conn.cursor()
-
-        cur.execute("ALTER TABLE " + table + " ADD COLUMN v" +  str(num) + " CHAR(50)")
-        conn.commit()
-        conn.close()
+    #     cur.execute(sqlstring)
+    #     conn.commit()
+    #     conn.close()

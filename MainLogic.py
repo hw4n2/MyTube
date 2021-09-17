@@ -43,7 +43,6 @@ class ProgramStart:
             if str(data[0][0]) == pwValue:
                 self.ui.stackedWidget.setCurrentIndex(2)
                 self.ui.idShowLabel.setText(self.id)
-                print(self.id)
                 self.newPlaylist.setId(self.id)
                 self.newPlaylist.loadFromData()
             

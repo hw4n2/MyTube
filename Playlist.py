@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 from youtubesearchpython import VideosSearch
+import pafy, urllib.request
 import random
 
 import ModifyWindow, Player, dbClass, Animation
@@ -118,12 +119,12 @@ class Playlist:
             self.ui.stackedWidget.setCurrentIndex(3)
             self.ui.listTitle.setText(title.text())
             
-
             for i in range(0, len(self.playList)):
                 if self.playList[i][0] == list:
                     index = i
                     break
             
+            self.player.curListTitle = self.titleList[index].text()
             
             
             if len(self.playList[index]) != 1:
@@ -215,11 +216,12 @@ class Playlist:
                 tempurl.append(self.player.URL[i])
                 self.playList[index].append(self.player.URL[i])
 
-            db.delete(self.id, "listname", self.titleList[index].text())
-            db.insert(self.id, ["listname"], [self.titleList[index].text()])
-            for j in range(0, len(tempurl)):
-                db.update(self.id, ["v" + str(j)], [tempurl[j]], "listname", self.titleList[index].text())
-                
+            for j in range(0, 10):
+                if j < len(tempurl):
+                    db.update(self.id, ["v" + str(j)], [tempurl[j]], "listname", self.titleList[index].text())
+                else:
+                    db.update(self.id, ["v" + str(j)], [None], "listname", self.titleList[index].text())
+
 
             self.player.relocateVideo()
                 
@@ -247,14 +249,14 @@ class Playlist:
         self.loadedTitle = []
         for i in range(0, len(data)):
             self.loadedTitle.append(data[i][0])
-            self.recreateList(i, data)
+            self.loadList(i, data)
 
         self.player.setId(self.id)
 
         
 
 
-    def recreateList(self, index, data):
+    def loadList(self, index, data):
         self.listCount += 1
         newList = QtWidgets.QLabel(self.ui.listWidget)
         newTitle = QtWidgets.QLineEdit(self.ui.listWidget)
@@ -271,14 +273,15 @@ class Playlist:
                 continue
             self.playList[len(self.playList) - 1].append(data[index][i + 1])
 
-
-        url = 
-        video = pafy.new(url)
-        thumbUrl = video.thumb
-        thumbnail = urllib.request.urlopen(thumbUrl).read()
-        pixmap = QtGui.QPixmap()
-        pixmap.loadFromData(thumbnail)
-        pixmap = pixmap.scaled(340, 220)
+        if data[index][1] != None:
+            url = data[index][1]
+            video = pafy.new(url)
+            thumbUrl = video.thumb
+            thumbnail = urllib.request.urlopen(thumbUrl).read()
+            pixmap = QtGui.QPixmap()
+            pixmap.loadFromData(thumbnail)
+            pixmap = pixmap.scaled(285, 210)
+            newList.setPixmap(pixmap)
 
         newTitle.setGeometry(newList.x(), newList.y() + 160, 285, 30)
         newTitle.setStyleSheet(

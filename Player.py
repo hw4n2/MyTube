@@ -22,6 +22,7 @@ class Player:
         self.loadURL = []
 
         self.curList_index = -1
+        self.curListTitle = ""
 
         self.search = SearchWindow.SearchWindow()
         self.search.searchBtn.mousePressEvent = lambda e: self.search.searchClicked(e)
@@ -159,14 +160,32 @@ class Player:
         title.close()
 
         db = dbClass.UseDb()
-        db.delete(self.id, "v" + str(index), url)
+        # db.delete(self.id, "v" + str(index), url)
+        db.update(self.id, ["v" + str(index)], [None], "v" + str(index), url)
 
-        self.msgbox.about(self.msgbox, "삭제", "삭제되었습니다. SAVE를 눌러주세요.")
+        self.msgbox.about(self.msgbox, "삭제", "삭제되었습니다.")
 
         
         del self.loadURL[index]
         del self.titleList[index]
         del self.videoList[index]
+
+
+        db = dbClass.UseDb()
+        data = db.select(self.id, ["*"], "listname", self.curListTitle)
+
+        tempurl = []
+        for k in range(0, len(data[0]) - 1):
+            if data[0][k + 1] == None:
+                continue
+            tempurl.append(data[0][k + 1])
+
+
+        for j in range(0, 10):
+            if j < len(tempurl):
+                db.update(self.id, ["v" + str(j)], [tempurl[j]], "listname", self.curListTitle)
+            else:
+                db.update(self.id, ["v" + str(j)], [None], "listname", self.curListTitle)
 
         self.relocateVideo()
 
