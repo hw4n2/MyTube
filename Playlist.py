@@ -84,7 +84,25 @@ class Playlist:
             "color: white;"
             "border: black;"
         )
-        newTitle.setText("새 재생목록 " + str(random.randint(0, 999999)))
+
+        db = dbClass.UseDb()
+        data = db.select(self.id, ["listname"], None, "")
+
+        for i in range(0, 100):
+            count = 0
+            for j in range(0, len(data)):
+                if data[j][0] == "새 재생목록 " + str(i):
+                    break
+                
+                else:
+                    count += 1
+                
+            if count == len(data):
+                newTitle.setText("새 재생목록 " + str(i))
+                break
+
+                    
+
         newTitle.setEnabled(False)
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -162,8 +180,7 @@ class Playlist:
         del self.playList[index]
         del self.titleList[index]
 
-        for i in range(0, len(self.player.loadURL)):
-            self.player.relocateVideo(i)
+        self.relocateWidget()
 
     def relocateWidget(self):
         for i in range(0, len(self.playList)):
@@ -187,18 +204,34 @@ class Playlist:
         self.tempTitle = self.titleList[index].text()
 
     def modifyReturnPressed(self, title):
-        index = self.titleList.index(title)
-        self.titleList[index].setStyleSheet(
-            "background-color: black;"
-            "color: white;"
-            "border: black;"
-        )
-        self.titleList[index].setText(self.titleList[index].text())
-        self.titleList[index].setEnabled(False)
-
         db = dbClass.UseDb()
-        db.update(self.id, ["listname"], [self.titleList[index].text()], "listname", self.tempTitle)
-        self.tempTitle = ""
+        data = db.select(self.id, ["listname"], None, "")
+
+        count = 0
+        for i in range(0, len(data)):
+            if data[i][0] == title.text():
+                break
+            
+            else:
+                count += 1
+            
+        if count == len(data):
+            index = self.titleList.index(title)
+            self.titleList[index].setStyleSheet(
+                "background-color: black;"
+                "color: white;"
+                "border: black;"
+            )
+            self.titleList[index].setText(self.titleList[index].text())
+            self.titleList[index].setEnabled(False)
+
+            
+            db.update(self.id, ["listname"], [self.titleList[index].text()], "listname", self.tempTitle)
+            self.tempTitle = ""
+
+        else:
+            self.msgbox.about(self.msgbox, "이름 수정", "이미 존재하는 재생목록명입니다.")
+            
 
     def setId(self, id):
         self.id = id
