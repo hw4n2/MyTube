@@ -404,9 +404,15 @@ class MainUi(object):
             "border-radius: 30px;"
         )
         self.playBtn.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        pixmap = QtGui.QPixmap("image\playBtn.jpg")
+        self.playBtn.setIcon(QtGui.QIcon(pixmap))
+        self.playBtn.setIconSize(QtCore.QSize(60, 60))
+        
+        
 
 
         self.controlBtnsL = []
+        image = ["image\pause.jpg", "image\stop.jpg", "image\min.jpg"]
         for i in range(0, 3):
             button = QtWidgets.QPushButton(self.playerPage)
             button.setGeometry(80 + 38 * i, 820, 30, 30)
@@ -415,17 +421,24 @@ class MainUi(object):
                 "border-radius: 15px;"
             )
             button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+            pixmap = QtGui.QPixmap(image[i])
+            button.setIcon(QtGui.QIcon(pixmap))
+            button.setIconSize(QtCore.QSize(30, 30))
             self.controlBtnsL.append(button)
 
         self.controlBtnsR = []
-        for i in range(0, 4):
+        image = ["image\\replay.jpg", "image\shuffle.jpg"]
+        for i in range(0, 2):
             button = QtWidgets.QPushButton(self.playerPage)
-            button.setGeometry(980 + 38 * i, 820, 30, 30)
+            button.setGeometry(1056 + 38 * i, 820, 30, 30)
             button.setStyleSheet(
                 "background-color: white;"
                 "border-radius: 15px;"
             )
             button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+            pixmap = QtGui.QPixmap(image[i])
+            button.setIcon(QtGui.QIcon(pixmap))
+            button.setIconSize(QtCore.QSize(30, 30))
             self.controlBtnsR.append(button)
 
         self.playerLogo = QtWidgets.QLabel(self.playerPage)
@@ -440,7 +453,36 @@ class MainUi(object):
             "background-color: black;"
         )
         self.playerLogo.setAlignment(QtCore.Qt.AlignCenter)
-        
+
+        self.playtime = QtWidgets.QLabel(self.playerPage)
+        self.playtime.setGeometry(7, 778, 125, 30)
+        self.playtime.setText("00:00:00/00:00:00")
+        self.playtime.setStyleSheet(
+            "background-color: black;"
+            "color: white;"
+            "font-size: 14px;"
+            )
+
+        self.positionslider = QSlider(QtCore.Qt.Horizontal, self.playerPage)
+        self.positionslider.setGeometry(135, 780, 1000, 25)
+        self.positionslider.setMaximum(1000)
+        self.positionslider.setStyleSheet(
+            "background-color: black;"
+        )
+        self.positionslider.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
+        self.volumeslider = QSlider(QtCore.Qt.Horizontal, self.playerPage)
+        self.volumeslider.setMaximum(100)
+        self.volumeslider.setGeometry(193, 825, 100, 20)
+        self.volumeslider.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
+        self.videoframe = QFrame(self.playerPage)
+        self.palette = self.videoframe.palette()
+        self.palette.setColor (QtGui.QPalette.Window, QtGui.QColor(0,0,0))
+        self.videoframe.setPalette(self.palette)
+        self.videoframe.setAutoFillBackground(True)
+        self.videoframe.setGeometry(10, 55, 1130, 680)
+        self.videoframe.setStyleSheet("background-color: white;")
 
         self.stackedWidget.addWidget(self.playerPage)
 

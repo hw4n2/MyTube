@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
-import pafy,urllib.request
+import pafy, urllib.request
+import vlc
 
 import SearchWindow, dbClass
 
@@ -29,13 +30,22 @@ class Player:
         self.search.finBtn.mousePressEvent = lambda e: self.okClicked(e)
         self.search.finBtn.mouseReleaseEvent = lambda e: self.search.closeWindow(e)
 
+
+        self.instance = vlc.Instance()
+        self.mediaplayer = self.instance.media_player_new()
+        self.mediaplayer.set_hwnd(self.ui.videoframe.winId())
+        self.isPaused = False
+
+        self.timer = QtCore.QTimer(self)
+        self.timer.setInterval(200)
+        self.timer.timeout.connect(self.updatePosition)
+
+
     def exitClicked(self):
         self.ui.listTitle.setText("")
         self.ui.stackedWidget.setCurrentIndex(2)
         self.curList_index = -1
         self.loadURL.clear()
-
-
 
     def addVideoClicked(self):
         for i in range(0, len(self.search.videoList)):
@@ -54,7 +64,6 @@ class Player:
         self.search.searchEdit.setText("")
         self.search.searchWindow.show()
 
-
     def okClicked(self, e):
         self.URL = self.search.returnList()
 
@@ -65,8 +74,6 @@ class Player:
 
         for i in range(0, len(self.loadURL)):
             self.relocateVideo(i)
-
-
 
     def relocateVideo(self, index):
         if index == 0:
@@ -114,6 +121,8 @@ class Player:
         self.videoList.append(newVideo)
         self.titleList.append(newTitle)
 
+        
+
         newVideo.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         newTitle.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         deleteActionV = QAction("삭제", newVideo)
@@ -125,10 +134,12 @@ class Player:
         u = url
         deleteActionV.triggered.connect(lambda: self.deleteClicked(v, t, u))
         deleteActionT.triggered.connect(lambda: self.deleteClicked(v, t, u))
+
+        newVideo.mousePressEvent = lambda e, u: self.startVideo(e, u)
+        newTitle.mousePressEvent = lambda e, u: self.startVideo(e, u)
+
         newVideo.show()
         newTitle.show()
-
-            
 
     def cutTitle(self,video):
         titleString = video.title
@@ -199,3 +210,54 @@ class Player:
     def setId(self, id):
         self.id = id
 
+    def startVideo(self, e, url):
+        if self.mediaplayer.is_playing():
+            self.mediaplayer.stop()
+
+        if url != None:
+            self.media = self.instance.media_new(self.loadURL[0])
+            self.mediaplayer.set_media(self.media)
+
+        else:
+            self.media = self.instance.media_new(url)
+            self.mediaplayer.set_media(self.media)
+
+        self.media.parse()
+        self.ui.curVideoTitle.setText(self.media.get_meta(0))
+        
+        self.mediaplayer.play()
+        self.timer.start()
+
+    def play(self):
+        if self.mediaplayer.is_playing():
+            self.mediaplayer.play()
+            self.isPaused = False
+
+
+    def pause(self):
+        if self.mediaplayer.is_playing():
+            self.mediaplayer.pause()
+            self.isPaused = True
+
+        else:
+            pass
+    
+    def stop(self):
+        if self.mediaplayer.is_playing():
+            self.mediaplayer.stop()
+            self.timer.stop()
+
+        else:
+            pass
+        
+    def setVolume(self, volume):
+        self.mediaplayer.audio_set_volume(volume)
+
+    def setPosition(self, position):
+        self.mediaplayer.set_position(position / 1000.0)
+
+    def updatePosition(self):
+        self.ui.positionslider.setValue(self.mediaplayer.get_position() * 1000)
+
+        if not self.mediaplayer.is_playing():
+            self.timer.stop()

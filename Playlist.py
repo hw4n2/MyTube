@@ -1,8 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
-from youtubesearchpython import VideosSearch
 import pafy, urllib.request
-import random
  
 import ModifyWindow, Player, dbClass, Animation
 
@@ -131,7 +129,6 @@ class Playlist:
         newList.show()
         newTitle.show()
 
-
     def listClicked(self, e, list, title):
         if e.button() == QtCore.Qt.LeftButton:
             self.ui.stackedWidget.setCurrentIndex(3)
@@ -154,6 +151,7 @@ class Playlist:
                 self.player.curList_index = index
                 for i in range(0, len(self.player.loadURL)):
                     self.player.relocateVideo(i)
+                self.player.startVideo(None, None)
 
             else:
                 self.player.curList_index = index
@@ -232,7 +230,6 @@ class Playlist:
         else:
             self.msgbox.about(self.msgbox, "이름 수정", "이미 존재하는 재생목록명입니다.")
             
-
     def setId(self, id):
         self.id = id
 
