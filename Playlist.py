@@ -151,7 +151,9 @@ class Playlist:
                 self.player.curList_index = index
                 for i in range(0, len(self.player.loadURL)):
                     self.player.relocateVideo(i)
-                self.player.startVideo(None, None)
+                self.player.startVideo(None, "nourl")
+                self.player.replayToggle = False
+                self.player.shuffleToggle = False
 
             else:
                 self.player.curList_index = index
@@ -286,9 +288,6 @@ class Playlist:
             self.loadList(i, data)
 
         self.player.setId(self.id)
-
-        
-
 
     def loadList(self, index, data):
         self.listCount += 1

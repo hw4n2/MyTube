@@ -2,11 +2,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 import pafy, urllib.request
 import vlc
+import random
 
 import SearchWindow, dbClass
 
  
-class Player:
+class Player():
     
     def __init__(self, ui):
         self.msgbox = QMessageBox()
@@ -34,11 +35,25 @@ class Player:
         self.instance = vlc.Instance()
         self.mediaplayer = self.instance.media_player_new()
         self.mediaplayer.set_hwnd(self.ui.videoframe.winId())
-        self.isPaused = False
 
-        self.timer = QtCore.QTimer(self)
+        self.timer = QtCore.QTimer(self.ui.videoframe)
         self.timer.setInterval(200)
-        self.timer.timeout.connect(self.updatePosition)
+        self.timer.timeout.connect(self.updateUi)
+
+        self.ui.positionslider.sliderMoved.connect(self.setPosition)
+        self.ui.volumeslider.valueChanged.connect(self.setVolume)
+        self.ui.playBtn.clicked.connect(self.play)
+        self.ui.controlBtnsL[0].clicked.connect(self.pause)
+        self.ui.controlBtnsL[1].clicked.connect(self.stop)
+        self.ui.controlBtnsL[2].clicked.connect(self.minimize)
+        self.ui.controlBtnsR[0].clicked.connect(self.replay)
+        self.ui.controlBtnsR[1].clicked.connect(self.shuffle)
+
+        self.miniWindow = QDialog()
+        self.miniWindow.resize(200, 80)
+        self.replayToggle = False
+        self.shuffleToggle = False
+
 
 
     def exitClicked(self):
@@ -46,6 +61,7 @@ class Player:
         self.ui.stackedWidget.setCurrentIndex(2)
         self.curList_index = -1
         self.loadURL.clear()
+        self.mediaplayer.stop()
 
     def addVideoClicked(self):
         for i in range(0, len(self.search.videoList)):
@@ -135,8 +151,8 @@ class Player:
         deleteActionV.triggered.connect(lambda: self.deleteClicked(v, t, u))
         deleteActionT.triggered.connect(lambda: self.deleteClicked(v, t, u))
 
-        newVideo.mousePressEvent = lambda e, u: self.startVideo(e, u)
-        newTitle.mousePressEvent = lambda e, u: self.startVideo(e, u)
+        newVideo.mousePressEvent = lambda e, u = url: self.startVideo(e, u)
+        newTitle.mousePressEvent = lambda e, u = url: self.startVideo(e, u)
 
         newVideo.show()
         newTitle.show()
@@ -210,34 +226,81 @@ class Player:
     def setId(self, id):
         self.id = id
 
+
+
     def startVideo(self, e, url):
         if self.mediaplayer.is_playing():
             self.mediaplayer.stop()
 
-        if url != None:
-            self.media = self.instance.media_new(self.loadURL[0])
-            self.mediaplayer.set_media(self.media)
+        if not "youtube" in url:
+            video = pafy.new(self.loadURL[0])
+            best = video.getbest()
+            media = self.instance.media_new(best.url)
+            self.mediaplayer.set_media(media)
+
+            try:
+                self.nextURL = self.loadURL[1]
+            except:
+                self.nextURL = None
+            
 
         else:
-            self.media = self.instance.media_new(url)
-            self.mediaplayer.set_media(self.media)
+            video = pafy.new(url)
+            best = video.getbest()
+            media = self.instance.media_new(best.url)
+            self.mediaplayer.set_media(media)
+            
+            index = self.loadURL.index(url)
+            try:
+                self.nextURL = self.loadURL[index + 1]
+            except:
+                self.nextURL = None
 
-        self.media.parse()
-        self.ui.curVideoTitle.setText(self.media.get_meta(0))
+
+
+        self.ui.curVideoTitle.setText(video.title)
+        self.duration = video.duration
+        self.ui.playtime.setText("00:00:00/" + self.duration)
         
         self.mediaplayer.play()
         self.timer.start()
 
     def play(self):
-        if self.mediaplayer.is_playing():
+        if not self.mediaplayer.is_playing():
             self.mediaplayer.play()
-            self.isPaused = False
 
+    def setNext(self):
+        self.mediaplayer.stop()
+        
+        if self.replayToggle == False and self.shuffleToggle == False and self.nextURL != None:
+            video = pafy.new(self.nextURL)
+            best = video.getbest()
+            media = self.instance.media_new(best.url)
+            self.mediaplayer.set_media(media)
+            index = self.loadURL.index(self.nextURL)
+            self.ui.curVideoTitle.setText(video.title)
+            self.mediaplayer.play()
+
+            try:
+                self.nextURL = self.loadURL[index + 1]
+            except:
+                self.nextURL = None
+
+        elif self.replayToggle == True:
+            self.mediaplayer.play()
+
+        elif self.shuffleToggle == True:
+            index = random.randint(0, len(self.loadURL) - 1)
+            video = pafy.new(self.loadURL[index])
+            best = video.getbest()
+            media = self.instance.media_new(best.url)
+            self.mediaplayer.set_media(media)
+            self.ui.curVideoTitle.setText(video.title)
+            self.mediaplayer.play()
 
     def pause(self):
         if self.mediaplayer.is_playing():
             self.mediaplayer.pause()
-            self.isPaused = True
 
         else:
             pass
@@ -256,8 +319,96 @@ class Player:
     def setPosition(self, position):
         self.mediaplayer.set_position(position / 1000.0)
 
-    def updatePosition(self):
-        self.ui.positionslider.setValue(self.mediaplayer.get_position() * 1000)
+    def updateUi(self):
+        if self.mediaplayer.get_position() >= 0.999:
+            self.setNext()
 
-        if not self.mediaplayer.is_playing():
-            self.timer.stop()
+        self.ui.positionslider.setValue(self.mediaplayer.get_position() * 1000.0)
+        curms = self.mediaplayer.get_time()
+        cursec = curms // 1000
+
+        hr = cursec // 3600
+        remainder = cursec % 3600
+        if hr < 10:
+            _hr = "0" + str(int(hr))
+        else:
+            _hr = str(int(hr))
+
+        min = remainder // 60
+        remainder = remainder % 60
+        if min < 10:
+            _min = "0" + str(int(min))
+        else:
+            _min = str(int(min))
+
+        sec = remainder
+        if sec < 10:
+            _sec = "0" + str(int(sec))
+        else:
+            _sec = str(int(sec))
+
+        self.ui.playtime.setText(_hr + ":" + _min + ":" + _sec + "/" + self.duration)
+
+    def replay(self):
+        if self.shuffleToggle == False:
+            if self.replayToggle == False:
+                self.replayToggle = True
+                self.ui.controlBtnsR[0].setToolTip("반복재생 끄기")
+
+            elif self.replayToggle == True:
+                self.replayToggle = False
+                self.ui.controlBtnsR[0].setToolTip("반복재생 켜기")
+
+
+        else:
+            self.msgbox.about(self.msgbox, "반복재생", "셔플을 먼저 꺼 주세요.")
+
+    def shuffle(self):
+        if self.replayToggle == False:
+            if self.shuffleToggle == False:
+                self.shuffleToggle = True
+                self.ui.controlBtnsR[1].setToolTip("셔플 끄기")
+
+
+            elif self.shuffleToggle == True:
+                self.shuffleToggle = False
+                self.ui.controlBtnsR[1].setToolTip("셔플 켜기")
+
+
+        else:
+            self.msgbox.about(self.msgbox, "셔플", "반복재생을 먼저 꺼 주세요.")
+
+
+    def minimize(self):
+        self.dialogBtn = []
+        image = ["image\playBtn", "image\pause.jpg", "image\stop.jpg", "image\max.jpg"]
+        for i in range(0, 4):
+            button = QtWidgets.QPushButton(self.miniWindow)
+            button.setGeometry(8 + 48 * i, 20, 40, 40)
+            button.setStyleSheet(
+                "border-radius: 20px;"
+            )
+            button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+            pixmap = QtGui.QPixmap(image[i])
+            button.setIcon(QtGui.QIcon(pixmap))
+            button.setIconSize(QtCore.QSize(40, 40))
+            self.dialogBtn.append(button)
+        
+        self.dialogBtn[0].clicked.connect(self.play)
+        self.dialogBtn[1].clicked.connect(self.pause)
+        self.dialogBtn[2].clicked.connect(self.stop)
+        self.dialogBtn[3].clicked.connect(self.exit_min)
+
+        
+        
+        self.miniWindow.show()
+        self.ui.MainWindow.hide()
+
+    
+    def exit_min(self):
+        self.miniWindow.close()
+        self.ui.MainWindow.show()
+
+        
+
+        

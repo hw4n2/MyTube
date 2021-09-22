@@ -428,6 +428,7 @@ class MainUi(object):
 
         self.controlBtnsR = []
         image = ["image\\replay.jpg", "image\shuffle.jpg"]
+        tooltip = ["반복재생 켜기", "셔플 켜기"]
         for i in range(0, 2):
             button = QtWidgets.QPushButton(self.playerPage)
             button.setGeometry(1056 + 38 * i, 820, 30, 30)
@@ -439,6 +440,7 @@ class MainUi(object):
             pixmap = QtGui.QPixmap(image[i])
             button.setIcon(QtGui.QIcon(pixmap))
             button.setIconSize(QtCore.QSize(30, 30))
+            button.setToolTip(tooltip[i])
             self.controlBtnsR.append(button)
 
         self.playerLogo = QtWidgets.QLabel(self.playerPage)
@@ -482,7 +484,6 @@ class MainUi(object):
         self.videoframe.setPalette(self.palette)
         self.videoframe.setAutoFillBackground(True)
         self.videoframe.setGeometry(10, 55, 1130, 680)
-        self.videoframe.setStyleSheet("background-color: white;")
 
         self.stackedWidget.addWidget(self.playerPage)
 
